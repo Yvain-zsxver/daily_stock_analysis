@@ -78,7 +78,7 @@ class _TushareHttpClient:
     def __init__(self, token: str, timeout: int = 30, api_url: str = "http://api.tushare.pro") -> None:
         self._token = token
         self._timeout = timeout
-        self._api_url = api_url
+        self._api_url = (api_url or "http://api.tushare.pro").rstrip("/")
 
     def query(self, api_name: str, fields: str = "", **kwargs) -> pd.DataFrame:
         req_params = {
@@ -165,21 +165,25 @@ class TushareFetcher(BaseFetcher):
             return
 
         try:
-            self._api = self._build_api_client(config.tushare_token)
-            logger.info("Tushare API 初始化成功")
+            api_url = os.getenv("TUSHARE_BASE_URL", "http://api.tushare.pro").strip() or "http://api.tushare.pro"
+            self._api = self._build_api_client(config.tushare_token, api_url=api_url)
+            logger.info(f"Tushare API 初始化成功 (base_url={api_url.rstrip('/')})")
         except Exception as e:
             logger.error(f"Tushare API 初始化失败: {e}")
             self._api = None
 
-    def _build_api_client(self, token: str) -> _TushareHttpClient:
+    def _build_api_client(self, token: str, api_url: Optional[str] = None) -> _TushareHttpClient:
         """
         Build a lightweight Tushare Pro client over direct HTTP requests.
 
         The project already normalizes all Pro calls through the same request
         contract, so we do not need the official tushare SDK during runtime.
         """
-        client = _TushareHttpClient(token=token)
-        logger.debug("Tushare API client configured for direct HTTP calls")
+        client = _TushareHttpClient(
+            token=token,
+            api_url=(api_url or "http://api.tushare.pro"),
+        )
+        logger.debug(f"Tushare API client configured for direct HTTP calls: {client._api_url}")
         return client
 
     def _determine_priority(self) -> int:
