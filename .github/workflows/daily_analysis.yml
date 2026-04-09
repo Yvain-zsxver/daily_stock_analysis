@@ -234,6 +234,7 @@ jobs:
           echo ""
           echo "【数据源】"
           echo "  Tushare Token: $([ -n "$TUSHARE_TOKEN" ] && echo '✅ 已配置' || echo '⚪ 未配置')"
+          echo "  Tushare Base URL: ${TUSHARE_BASE_URL:-<empty>}"
           echo "  Longbridge: $([ -n "$LONGBRIDGE_APP_KEY" ] && [ -n "$LONGBRIDGE_APP_SECRET" ] && [ -n "$LONGBRIDGE_ACCESS_TOKEN" ] && echo '✅ 已配置（美股/港股行情补充）' || echo '⚪ 未配置（仅 YFinance 等，无长桥调用）')"
           echo ""
           echo "【搜索引擎】"
